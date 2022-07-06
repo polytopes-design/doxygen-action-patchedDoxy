@@ -26,13 +26,23 @@ else
   BUILD_LATEX=0
 fi
 
-PACKAGES="doxygen graphviz ttf-freefont $4"
+PACKAGES="graphviz ttf-freefont texlive-fonts-extra cmake build-essential $4"
 if [ "$BUILD_LATEX" = true ] ; then
   PACKAGES="$PACKAGES perl build-base texlive-full biblatex ghostscript"
 fi
 apk add $PACKAGES
 
-echo "::notice::You're on the bleeding edge of doxygen-action. To pin this version use: mattnotmitt/doxygen-action@$(doxygen --version)"
+
+git clone git@github.com:doxygen/doxygen.git
+cd doxygen
+git checkout 77074075dc61f8c1be7fdba940bddbb7315980da
+mv patch ./
+git apply 0001-Patch-to-make-call-graphs-output-in-order-of-calling.patch
+mkdir build
+cd build
+cmake -G "Unix Makefiles" ..
+make
+make install
 
 # run "regular" doxygen
 doxygen $1
